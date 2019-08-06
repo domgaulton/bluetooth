@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bluetooth</title>
+    <style type="text/css">
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <button onClick="initBluetooth()">Click Me!</button>
+    <script type="text/javascript">
+      function initBluetooth() {
+        let options = {
+          // filters: [
+          //   { services: ["heart_rate"] },
+          //   { services: [0x1802, 0x1803] },
+          //   { services: ["c48e6067-5295-48d3-8d5c-0395f61792b1"] },
+          //   { name: "ExampleName" },
+          //   { namePrefix: "Prefix" }
+          // ],
+          optionalServices: ["battery_service"],
+          acceptAllDevices: true
+        };
+
+        navigator.bluetooth
+          .requestDevice(options)
+          .then(device => {
+            console.log("Name: " + device.name);
+            // Do something with the device.
+          })
+          .then(server => {
+            // Getting Battery Service...
+            return server.getPrimaryService('battery_service');
+          })
+          .then(service => {
+            // Getting Battery Level Characteristic...
+            return service.getCharacteristic('battery_level');
+          })
+          .then(characteristic => {
+            // Event listener
+            characteristic.addEventListener('characteristicvaluechanged',
+                                  handleBatteryLevelChanged);
+            // Reading Battery Level...
+            return characteristic.readValue();
+          })
+          .then(value => {
+            console.log('Battery percentage is ' + value.getUint8(0));
+          })
+          .catch(function(error) {
+            console.log("Something went wrong. " + error);
+          });
+      }
+    </script>
+  </body>
+</html>
